@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warranty & Product Ownership Flow — Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.5; }
+  .header { background: linear-gradient(135deg, #003366 0%, #0055a4 100%); color: white; padding: 32px 40px; }
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 28px 32px; margin-bottom: 28px; }
+  .card h2 { font-size: 18px; color: #003366; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+  .card h3 { font-size: 14px; color: #4a5568; margin: 16px 0 8px; font-weight: 600; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: #edf2f7; border: 2px solid #cbd5e0; border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 140px; }
+  .flow-box.manufacturer { background: #ebf8ff; border-color: #90cdf4; }
+  .flow-box.dealer { background: #f0fff4; border-color: #9ae6b4; }
+  .flow-box.consumer { background: #fffaf0; border-color: #fbd38d; }
+  .flow-box.platform { background: #faf5ff; border-color: #d6bcfa; }
+  .flow-arrow { font-size: 24px; color: #a0aec0; padding: 0 8px; }
+  .flow-label { font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .flow-title { font-size: 14px; font-weight: 700; color: #2d3748; }
+  .flow-sub { font-size: 11px; color: #718096; margin-top: 2px; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .info-block { background: #f7fafc; border-left: 4px solid #0055a4; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 13px; }
+  .info-block.success { border-left-color: #38a169; background: #f0fff4; }
+  .info-block.warn { border-left-color: #d69e2e; background: #fffff0; }
+
+  /* Steps */
+  .steps { counter-reset: step; }
+  .step { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; padding: 12px 16px; background: #f7fafc; border-radius: 8px; }
+  .step-num { background: #0055a4; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; font-size: 14px; color: #2d3748; }
+  .step-desc { font-size: 12px; color: #718096; margin-top: 2px; }
+  .step-actor { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+  .actor-consumer { background: #fffaf0; color: #c05621; }
+  .actor-dealer { background: #f0fff4; color: #276749; }
+  .actor-manufacturer { background: #ebf8ff; color: #2b6cb0; }
+
+  /* Module tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .tag { background: #edf2f7; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500; color: #4a5568; }
+  .tag.core { background: #ebf8ff; border-color: #90cdf4; color: #2b6cb0; }
+  .tag.ext { background: #faf5ff; border-color: #d6bcfa; color: #6b46c1; }
+
+  /* Twin grid */
+  .twin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .twin-col { background: #f7fafc; border-radius: 8px; padding: 14px; }
+  .twin-col h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #0055a4; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+  .twin-col ul { list-style: none; padding: 0; }
+  .twin-col li { font-size: 12px; padding: 2px 0; color: #4a5568; }
+  .twin-col li::before { content: "•"; color: #0055a4; margin-right: 6px; }
+
+  /* Example card */
+  .example-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+  .example-card h4 { font-size: 16px; margin-bottom: 10px; }
+  .example-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; font-size: 13px; }
+  .example-fields span { opacity: 0.9; }
+  .example-fields strong { display: block; font-size: 14px; }
+
+  /* Status bar */
+  .status-bar { display: flex; gap: 8px; margin: 16px 0; }
+  .status-step { flex: 1; text-align: center; padding: 10px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+  .status-active { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+  .status-pending { background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; }
+
+  /* MVP */
+  .mvp-list { display: flex; flex-direction: column; gap: 10px; }
+  .mvp-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #f7fafc; border-radius: 8px; }
+  .mvp-num { background: #0055a4; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .mvp-text { flex: 1; }
+  .mvp-title { font-weight: 600; font-size: 14px; color: #2d3748; }
+  .mvp-desc { font-size: 12px; color: #718096; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #003366; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #4a5568; }
+  tr:nth-child(even) td { background: #f7fafc; }
+
+  .footer { text-align: center; padding: 24px; color: #a0aec0; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Warranty & Product Ownership Flow</h1>
+  <p>Digital Warranty Platform — Odoo + API + Consumer Digital Twin</p>
+</div>
+
+<div class="container">
+
+  <!-- Flow Diagram -->
+  <div class="card">
+    <h2>System Flow</h2>
+    <div class="flow">
+      <div class="flow-box manufacturer">
+        <div class="flow-label">Manufacturer</div>
+        <div class="flow-title">Odoo ERP</div>
+        <div class="flow-sub">Warranty rules, Claims, Reimbursement</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box dealer">
+        <div class="flow-label">Dealership / Shop</div>
+        <div class="flow-title">Sales + Service</div>
+        <div class="flow-sub">Serial numbers, Customer service</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box platform">
+        <div class="flow-label">Your Platform</div>
+        <div class="flow-title">Digital Twin + Engine</div>
+        <div class="flow-sub">Claims, Notifications, Audit log</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box consumer">
+        <div class="flow-label">Consumer</div>
+        <div class="flow-title">Dashboard</div>
+        <div class="flow-sub">Warranty status, Service request, Tracking</div>
+      </div>
+    </div>
+    <div class="info-block">
+      <strong>Integration principle:</strong> Dedicated Odoo integration/bot user with minimum required permissions. Connect via supported Odoo external API — no unrestricted admin credentials.
+    </div>
+  </div>
+
+  <!-- Digital Twin -->
+  <div class="card">
+    <h2>Digital Product Twin</h2>
+    <p style="font-size:13px; color:#718096; margin-bottom:12px;">One persistent ownership record per product — from purchase to warranty expiry and service.</p>
+    <div class="twin-grid">
+      <div class="twin-col">
+        <h4>Product Identity</h4>
+        <ul>
+          <li>Brand</li>
+          <li>Product / Model</li>
+          <li>Serial number</li>
+          <li>Lot / Batch</li>
+        </ul>
+      </div>
+      <div class="twin-col">
+        <h4>Purchase</h4>
+        <ul>
+          <li>Customer</li>
+          <li>Dealer</li>
+          <li>Invoice / Receipt</li>
+          <li>Purchase date</li>
+        </ul>
+      </div>
+      <div class="twin-col">
+        <h4>Warranty</h4>
+        <ul>
+          <li>Warranty plan</li>
+          <li>Start date</li>
+          <li>Expiry date</li>
+          <li>Coverage / Exclusions</li>
+        </ul>
+      </div>
+      <div class="twin-col">
+        <h4>Service History</h4>
+        <ul>
+          <li>Claims</li>
+          <li>Inspections</li>
+          <li>Repairs</li>
+          <li>Parts replaced</li>
+        </ul>
+      </div>
+    </div>
+    <div class="example-card">
+      <h4>Example: Samsung Washing Machine WW90</h4>
+      <div class="example-fields">
+        <span>Serial: <strong>SN123456789</strong></span>
+        <span>Purchased: <strong>22 Sep 2026</strong></span>
+        <span>Warranty: <strong>24 months</strong></span>
+        <span>Expires: <strong>21 Sep 2028</strong></span>
+        <span>Status: <strong>ACTIVE</strong></span>
+        <span>Platform: <strong>Warranty Platform</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Claim Lifecycle -->
+  <div class="card">
+    <h2>Warranty Claim &amp; Service Lifecycle</h2>
+    <p style="font-size:13px; color:#718096; margin-bottom:16px;">7-step end-to-end flow across Consumer, Dealer, and Manufacturer.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Consumer Reports Problem</div>
+          <div class="step-desc">Product linked automatically via Digital Twin. No need to re-enter serial, invoice, or purchase info.</div>
+          <span class="step-actor actor-consumer">Consumer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Dealer Inspects &amp; Diagnoses</div>
+          <div class="step-desc">Serial / warranty status verified against the platform.</div>
+          <span class="step-actor actor-dealer">Dealer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Dealer Creates Claim</div>
+          <div class="step-desc">Diagnosis + evidence submitted. Claim inherits product, customer, dealer, and purchase details automatically.</div>
+          <span class="step-actor actor-dealer">Dealer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Manufacturer Reviews Claim</div>
+          <div class="step-desc">System checks warranty status using purchase date, warranty rules, and product identity.</div>
+          <span class="step-actor actor-manufacturer">Manufacturer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Repair / Replace</div>
+          <div class="step-desc">Parts and labour recorded. Dealer receives product for repair/replacement if applicable.</div>
+          <span class="step-actor actor-dealer">Dealer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Consumer Receives Resolution</div>
+          <div class="step-desc">Consumer confirms resolution. Claim status visible throughout.</div>
+          <span class="step-actor actor-consumer">Consumer</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-title">Reimbursement &amp; Closure</div>
+          <div class="step-desc">Manufacturer reimburses dealer. Approved claim closed; service history attached to Digital Twin.</div>
+          <span class="step-actor actor-manufacturer">Manufacturer</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-block warn">
+      <strong>Automatic decision:</strong> If warranty expired, consumer is shown warranty status and available next steps.
+    </div>
+  </div>
+
+  <!-- Claim Status Tracking -->
+  <div class="card">
+    <h2>Claim Status Tracking</h2>
+    <div class="status-bar">
+      <div class="status-step status-active">1 Submitted</div>
+      <div class="status-step status-active">2 Dealer Inspected</div>
+      <div class="status-step status-pending">3 Manufacturer Review</div>
+      <div class="status-step status-pending">4 Repair</div>
+      <div class="status-step status-pending">5 Completed</div>
+    </div>
+    <p style="font-size:12px; color:#a0aec0; text-align:center;">Consumer sees full lifecycle from submission through repair and closure.</p>
+  </div>
+
+  <!-- Odoo Integration -->
+  <div class="card">
+    <h2>Odoo Integration — Modules</h2>
+    <div style="margin-bottom:16px;">
+      <h3>Core Modules</h3>
+      <div class="tags">
+        <span class="tag core">Sales</span>
+        <span class="tag core">Inventory</span>
+        <span class="tag core">Contacts</span>
+        <span class="tag core">Helpdesk</span>
+        <span class="tag core">Repairs</span>
+        <span class="tag core">Purchase</span>
+      </div>
+    </div>
+    <div>
+      <h3>Platform Extensions</h3>
+      <div class="tags">
+        <span class="tag ext">Studio</span>
+        <span class="tag ext">Automation</span>
+        <span class="tag ext">Portal / Website</span>
+        <span class="tag ext">External API</span>
+      </div>
+    </div>
+    <div class="info-block success">
+      <strong>Security:</strong> Dedicated integration account with only required permissions. Log API activity and synchronization failures.
+    </div>
+  </div>
+
+  <!-- Consumer Dashboard -->
+  <div class="card">
+    <h2>Consumer Dashboard</h2>
+    <div class="grid-2">
+      <div>
+        <h3>My Products</h3>
+        <div class="info-block">
+          <strong>Samsung Washing Machine WW90</strong><br>
+          Serial: SN123456789 | Purchased: 22 Sep 2026<br>
+          Warranty: 24 months | Expires: 21 Sep 2028<br>
+          <span style="color:#38a169; font-weight:600;">WARRANTY ACTIVE</span>
+        </div>
+        <div class="tags" style="margin-top:8px;">
+          <span class="tag">VIEW PRODUCT</span>
+          <span class="tag">REQUEST SERVICE</span>
+        </div>
+      </div>
+      <div>
+        <h3>Claim Status</h3>
+        <div style="font-size:13px; color:#4a5568;">
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #e2e8f0;">
+            <span>Submitted</span><span style="color:#38a169;">&#10003;</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #e2e8f0;">
+            <span>Dealer Inspected</span><span style="color:#38a169;">&#10003;</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #e2e8f0;">
+            <span>Manufacturer Review</span><span style="color:#d69e2e;">pending</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #e2e8f0;">
+            <span>Repair</span><span style="color:#d69e2e;">pending</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span>Completed</span><span style="color:#d69e2e;">pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MVP Build Order -->
+  <div class="card">
+    <h2>Prototype MVP — Build Order</h2>
+    <p style="font-size:13px; color:#718096; margin-bottom:16px;">5 screens + 1 integration</p>
+    <div class="mvp-list">
+      <div class="mvp-item">
+        <div class="mvp-num">1</div>
+        <div class="mvp-text">
+          <div class="mvp-title">Odoo Connection</div>
+          <div class="mvp-desc">Connect authorized integration account and test synchronization.</div>
+        </div>
+      </div>
+      <div class="mvp-item">
+        <div class="mvp-num">2</div>
+        <div class="mvp-text">
+          <div class="mvp-title">Product Registration</div>
+          <div class="mvp-desc">Create product/serial/ownership records from a completed sale.</div>
+        </div>
+      </div>
+      <div class="mvp-item">
+        <div class="mvp-num">3</div>
+        <div class="mvp-text">
+          <div class="mvp-title">Consumer Dashboard</div>
+          <div class="mvp-desc">Show product, serial, purchase date, warranty duration and status.</div>
+        </div>
+      </div>
+      <div class="mvp-item">
+        <div class="mvp-num">4</div>
+        <div class="mvp-text">
+          <div class="mvp-title">Warranty Claim</div>
+          <div class="mvp-desc">Consumer submits issue; product and warranty data attached automatically.</div>
+        </div>
+      </div>
+      <div class="mvp-item">
+        <div class="mvp-num">5</div>
+        <div class="mvp-text">
+          <div class="mvp-title">Claim Tracking</div>
+          <div class="mvp-desc">Dealer/manufacturer/consumer see the same lifecycle status.</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-block success" style="margin-top:16px;">
+      <strong>Core proposition:</strong> Every product gets a Digital Twin from purchase to warranty expiry and service.
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Warranty & Product Ownership Flow Dashboard &mdash; Generated from Warranty_Product_Ownership_Flow.pdf &mdash; September 2026
+</div>
+
+</body>
+</html>
